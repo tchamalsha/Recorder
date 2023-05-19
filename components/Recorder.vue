@@ -1,12 +1,11 @@
 <template>
     <div class="container align-items-center">
-      <div class="d-flex justify-content-center">
+      <div class="d-flex justify-content-center mt-5">
         <div class="card-custom col-sm-10 p-sm-4 p-3 m-sm-0 m-2">
-            <div>
-                <button @click="startRecording" :disabled="recording">Start Recording</button>
-                <button @click="stopRecording" :disabled="!recording">Stop Recording</button>
-                <button @click="downloadRecording" :disabled="!recording || !audioData">Download</button>
-                <audio ref="audioElement" controls></audio>
+            <div class="d-flex">
+                <button class="btn btn-secondary" @click="startRecording" :disabled="recording">Start Recording</button>
+                <button class="btn btn-secondary" @click="stopRecording" :disabled="!recording">Stop Recording</button>
+                <p class="float-end" v-if="!recording">Recording Time: {{ recordingTime }} secs</p>
             </div>
          </div>
         </div>
@@ -14,22 +13,31 @@
   </template>
   
   <script>
-  export default {
-  data() {
+export default {
+    data() {
     return {
       mediaRecorder: null,
-      audioChunks: [],
+      chunks: [],
       recording: false,
-      audioData: null
+      audioData: null,
+      timerDuration: 10, // Timer duration in seconds
+      recordingTime: 0, // Elapsed recording time
+      timerInterval: null // Interval ID for the timer
     };
   },
   methods: {
     startRecording() {
+
+        this.recordingTime = 0; // Reset the recording time
+      this.timerInterval = setInterval(() => {
+        this.recordingTime++;
+      }, 1000); // Update the recording time every second
+
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
           this.mediaRecorder = new MediaRecorder(stream);
           this.mediaRecorder.addEventListener('dataavailable', event => {
-            this.audioChunks.push(event.data);
+            this.chunks.push(event.data);
           });
           this.mediaRecorder.start();
           this.recording = true;
@@ -40,27 +48,52 @@
     },
     stopRecording() {
       this.mediaRecorder.stop();
+
+      clearInterval(this.timerInterval); // Stop the timer
+
       this.recording = false;
       this.mediaRecorder.addEventListener('stop', () => {
-        const audioBlob = new Blob(this.audioChunks);
-        this.audioData = audioBlob;
-        this.$refs.audioElement.src = URL.createObjectURL(audioBlob);
-        console.log(audioBlob);
-      });
+        const blob = new Blob(this.chunks, { type: 'audio/webm' });
+        this.chunks = [];
+        this.audioData = blob;
+        
+        let audioFile = new File([blob], 'recording.webm', { type: 'audio/webm' })
+
+        console.log(audioFile);
+
+        // var myHeaders = new Headers();
+        // myHeaders.append("Authorization", "Bearer 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");
+
+        // var formdata = new FormData();
+        // formdata.append("file", audioFile, "recording.webm");
+        // formdata.append("model", "whisper-1");
+        // formdata.append("response_format", "json");
+
+        // var requestOptions = {
+        // method: 'POST',
+        // headers: myHeaders,
+        // body: formdata,
+        // redirect: 'follow'
+        // };
+
+        // fetch("https://api.openai.com/v1/audio/transcriptions", requestOptions)
+        // .then(response => response.text())
+        // .then(result => console.log(result))
+        // .catch(error => console.log('error', error));
+
+         });
     },
     downloadRecording() {
-    if (this.audioData) {
-        const url = URL.createObjectURL(this.audioData);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "recording.wav";
-        a.click();
-        URL.revokeObjectURL(url);
+      const url = URL.createObjectURL(this.audioData);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'recording.webm';
+      a.click();
+      URL.revokeObjectURL(url);
     }
   }
-}
 };
-  </script>
+</script>
   <style lang="css" scoped>
   .sub-title{
     color: gray;
