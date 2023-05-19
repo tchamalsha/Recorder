@@ -1,0 +1,16 @@
+[
+  {
+    "name": "record",
+    "path": "/record",
+    "component": "/Users/chamalsha/Desktop/Recorder/pages/record/index.vue",
+    "chunkName": "pages/record/index",
+    "_name": "_67bd7cb6"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/Users/chamalsha/Desktop/Recorder/pages/index.vue",
+    "chunkName": "pages/index",
+    "_name": "_c64621c0"
+  }
+]
