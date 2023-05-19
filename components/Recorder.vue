@@ -1,12 +1,30 @@
 <template>
     <div class="container align-items-center">
       <div class="d-flex justify-content-center mt-5">
-        <div class="card-custom col-sm-10 p-sm-4 p-3 m-sm-0 m-2">
-            <div class="d-flex">
+        <div class="card-custom col-sm-10 p-sm-4 p-3 m-sm-0 m-2 ">
+            <div class="row">
+                <div class="col-12">
+                    <p>Click on start recording button to start recording and stop button to stop recording!</p>
+
+                </div>            
+            </div>
+            <div class="row mt-3">
+                <div class="col-8">
                 <button class="btn btn-secondary" @click="startRecording" :disabled="recording">Start Recording</button>
                 <button class="btn btn-secondary" @click="stopRecording" :disabled="!recording">Stop Recording</button>
-                <p class="float-end" v-if="!recording">Recording Time: {{ recordingTime }} secs</p>
             </div>
+            <div class="col-4 ">
+                <p class="float-end align-items-center" >Recording Time: {{ recordingTime }} secs</p>
+            </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-12">
+                    <p>Your text will appear here shortly after you stop recording..</p>
+                    <p>{{ recordedText }}</p>
+                </div>
+            </div>
+            
          </div>
         </div>
       </div>
@@ -16,6 +34,7 @@
 export default {
     data() {
     return {
+        recordedText:"",
       mediaRecorder: null,
       chunks: [],
       recording: false,
@@ -29,7 +48,7 @@ export default {
     startRecording() {
 
         this.recordingTime = 0; // Reset the recording time
-      this.timerInterval = setInterval(() => {
+        this.timerInterval = setInterval(() => {
         this.recordingTime++;
       }, 1000); // Update the recording time every second
 
@@ -61,25 +80,25 @@ export default {
 
         console.log(audioFile);
 
-        // var myHeaders = new Headers();
-        // myHeaders.append("Authorization", "Bearer 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");
+        var myHeaders = new Headers();
+        myHeaders.append("Authorization", "Bearer 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");
 
-        // var formdata = new FormData();
-        // formdata.append("file", audioFile, "recording.webm");
-        // formdata.append("model", "whisper-1");
-        // formdata.append("response_format", "json");
+        var formdata = new FormData();
+        formdata.append("file", audioFile, "recording.webm");
+        formdata.append("model", "whisper-1");
+        formdata.append("response_format", "json");
 
-        // var requestOptions = {
-        // method: 'POST',
-        // headers: myHeaders,
-        // body: formdata,
-        // redirect: 'follow'
-        // };
+        var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: formdata,
+        redirect: 'follow'
+        };
 
-        // fetch("https://api.openai.com/v1/audio/transcriptions", requestOptions)
-        // .then(response => response.text())
-        // .then(result => console.log(result))
-        // .catch(error => console.log('error', error));
+        fetch("https://api.openai.com/v1/audio/transcriptions", requestOptions)
+        .then(response => response.text())
+        .then(result => this.animateText(result))
+        .catch(error => console.log('error', error));
 
          });
     },
@@ -90,6 +109,19 @@ export default {
       a.download = 'recording.webm';
       a.click();
       URL.revokeObjectURL(url);
+    },
+    animateText(text1) {
+      const speed = 100; // Typing speed in milliseconds
+      let index = 0;
+
+      const typingInterval = setInterval(() => {
+        this.recordedText += text1[index];
+        index++;
+
+        if (index >= text1.length) {
+          clearInterval(typingInterval);
+        }
+      }, speed);
     }
   }
 };

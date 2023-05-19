@@ -10,6 +10,8 @@ import '../node_modules/bootstrap/dist/css/bootstrap.css'
 
 import '../node_modules/bootstrap-vue/dist/bootstrap-vue.css'
 
+import '../assets/css/tabler.min.css'
+
 import _6d4207cb from '../layouts/center.vue'
 import _6f6c098b from './layouts/default.vue'
 
